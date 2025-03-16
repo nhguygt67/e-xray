@@ -1,0 +1,65 @@
+import cv2
+
+# Capture image from webcam
+camera = cv2.VideoCapture(0)
+ret, frame = camera.read()
+if ret:
+    cv2.imwrite("captured_photo.jpg", frame)
+camera.release()
+import cv2
+
+# Load the captured image
+img = cv2.imread("captured_photo.jpg")
+
+# Convert the image to grayscale
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+# Initialize ORB detector
+orb = cv2.ORB_create()
+
+# Detect key points and descriptors
+kp, des = orb.detectAndCompute(gray, None)
+
+# Draw key points on the image
+img_with_keypoints = cv2.drawKeypoints(img, kp, None, color=(0,255,0), flags=0)
+
+# Save or display the image with keypoints
+cv2.imwrite("keypoints_image.jpg", img_with_keypoints)
+cv2.imshow("Keypoints", img_with_keypoints)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+import requests
+
+API_KEY = 'your_google_api_key'
+CX = 'your_custom_search_engine_id'
+
+# Search query (could be related to the captured image)
+query = "photo of a sunset"  # Example query
+
+url = f"https://www.googleapis.com/customsearch/v1?q={query}&cx={CX}&searchType=image&key={API_KEY}"
+
+response = requests.get(url)
+results = response.json()
+
+# Parse the search results
+for item in results.get('items', []):
+    print(item['link'])  # This will print the URL of images
+from google.cloud import vision
+from google.cloud.vision import types
+
+# Initialize Google Vision client
+client = vision.ImageAnnotatorClient()
+
+# Load the image file
+with open('captured_photo.jpg', 'rb') as image_file:
+    content = image_file.read()
+
+# Create an Image instance
+image = types.Image(content=content)
+
+# Perform label detection on the image file
+response = client.label_detection(image=image)
+
+# Print the labels detected
+for label in response.label_annotations:
+    print(label.description)
